@@ -30,12 +30,14 @@ public class ControllerPlayer : MonoBehaviour
     {
         GetMoveInput();
         GetTurnInput();
+
+        basePerson.Turn(v3Turn.y, v3Turn.x);
     }
 
     // 固定更新事件：50 FPS 物理行為在此事件內執行
     private void FixedUpdate()
     {
-        basePerson.Move(v3Move);
+        basePerson.Move(transform.forward * v3Move.z + transform.right * v3Move.x);
     }
     #endregion
 
