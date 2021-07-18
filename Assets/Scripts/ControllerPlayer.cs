@@ -18,18 +18,29 @@ public class ControllerPlayer : MonoBehaviour
     /// 要旋轉的值
     /// </summary>
     private Vector3 v3Turn;
+    /// <summary>
+    /// 攝影機
+    /// </summary>
+    private Transform traCamera;
     #endregion
-
+    private void TurnCamera()
+    {
+        traCamera.LookAt(basePerson.traTarget);
+    }
     #region 事件
     private void Start()
     {
         basePerson = GetComponent<BasePerson>();
+        traCamera = transform.Find("攝影機");
+
     }
 
     private void Update()
     {
         GetMoveInput();
         GetTurnInput();
+        TurnCamera();
+        Fire();
 
         basePerson.Turn(v3Turn.y, v3Turn.x);
     }
@@ -62,6 +73,10 @@ public class ControllerPlayer : MonoBehaviour
         float mouseY = Input.GetAxis("Mouse Y");    // 取得滑鼠 Y 值
         v3Turn.x = mouseY;                          // 物件 X 軸對應滑鼠 Y
         v3Turn.y = mouseX;                          // 物件 Y 軸對應滑鼠 X
+    }
+    private void Fire()
+    {
+        if (Input.GetKey(KeyCode.Mouse0)) basePerson.Fire();
     }
     #endregion
 }

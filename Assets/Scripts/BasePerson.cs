@@ -21,9 +21,40 @@ public class BasePerson : MonoBehaviour
     private Animator ani;
     private Rigidbody rig;
     private AudioSource aud;
-    private Transform traTarget;
-    #endregion
 
+    [HideInInspector]
+    public Transform traTarget;
+
+
+    #endregion
+    [Header("發射子彈位置")]
+    public Transform traFirePoint;
+    [Header("子彈預製物")]
+    public GameObject objBullet;
+    [Header("子彈發射速度"), Range(0, 3000)]
+    public float speedBullet = 600;
+    [Header("子彈發射間隔時間"), Range(0, 3000)]
+    public float intervalFire = 0.1f;
+    [Header("開槍聲音")]
+    public AudioClip soundFire;
+    /// <summary>
+    /// 子彈目前數量
+    /// </summary>
+    private int bulletCurrent = 30;
+    /// <summary>
+    /// 彈匣數量
+    /// </summary>
+    private int bulletClip = 30;
+    /// <summary>
+    /// 子彈總數
+    /// </summary>
+    private int bulletTotal = 120;
+
+    private float timerFire;
+    private void Update()
+    {
+        AnimatorMove();
+    }
     #region 事件
     private void Start()
     {
@@ -34,6 +65,7 @@ public class BasePerson : MonoBehaviour
         #endregion
 
         traTarget = transform.Find("目標物件");
+        
     }
     #endregion
 
@@ -69,4 +101,26 @@ public class BasePerson : MonoBehaviour
         traTarget.localPosition = posTarget;
     }
     #endregion
+    /// <summary>
+    /// 開槍方法
+    /// </summary>
+    public void Fire()
+    {
+        if (timerFire < intervalFire) timerFire += Time.deltaTime;
+        else
+        {
+            bulletCurrent--;
+            timerFire = 0;
+            aud.PlayOneShot(soundFire, Random.Range(0.5f, 1.2f));
+            GameObject tempBullet = Instantiate(objBullet, traFirePoint.position, Quaternion.identity);
+            tempBullet.GetComponent<Rigidbody>().AddForce(traFirePoint.right * speedBullet);
+        }
+    }
+    private void AnimatorMove()
+    {
+        /*
+        bool move = rig.velocity.x != 0 || rig.velocity.z != 0;
+        ani.SetBool("走路開關", true);
+        */
+    }
 }
