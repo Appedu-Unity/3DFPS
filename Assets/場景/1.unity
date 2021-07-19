@@ -1567,14 +1567,19 @@ MonoBehaviour:
   attack: 217
   turn: 10
   traTarget: {fileID: 0}
+  groundRadius: -0.07
+  groundOffset: {x: 0, y: 0, z: 0}
   traFirePoint: {fileID: 2017098853}
   objBullet: {fileID: 514157001793259379, guid: 3c290c888fe3b904b99aa1c2faee4606,
     type: 3}
   speedBullet: 600
   intervalFire: 0.5
-  soundFire: {fileID: 0}
+  soundFire: {fileID: 8300000, guid: 05cfd7c519a7a0a4ead45db5b502a5d6, type: 3}
   moussUpDown: 1.5
   v2TargetLimit: {x: 0, y: 3}
+  bulletCurrent: 1
+  bulletTotal: 120
+  soundFireEmpty: {fileID: 8300000, guid: 74985c414a2a92e44b21145acea1e833, type: 3}
 --- !u!114 &597477714
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2877,7 +2882,7 @@ GameObject:
   - component: {fileID: 950101347}
   - component: {fileID: 950101346}
   - component: {fileID: 950101345}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3479,7 +3484,7 @@ GameObject:
   - component: {fileID: 1115751649}
   - component: {fileID: 1115751648}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: "\u756B\u5E03"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7563,7 +7568,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70b342d8ce5c2fd48b8fa3147d48d1d1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Weight: 1
+  m_Weight: 0
   m_Effectors: []
 --- !u!4 &1848803013
 Transform:

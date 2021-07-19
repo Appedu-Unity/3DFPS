@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-
+using UnityEngine.UI;
 /// <summary>
 /// 玩家控制類別：玩家滑鼠、鍵盤的輸入資訊以及跟 Base Person 溝通
 /// </summary>
@@ -22,6 +22,14 @@ public class ControllerPlayer : MonoBehaviour
     /// 攝影機
     /// </summary>
     private Transform traCamera;
+    /// <summary>
+    /// 目前子彈數量
+    /// </summary>
+    private Text textBulletCurrent;
+    /// <summary>
+    /// 子彈總數
+    /// </summary>
+    private Text textBulletTotal;
     #endregion
     private void TurnCamera()
     {
@@ -32,7 +40,9 @@ public class ControllerPlayer : MonoBehaviour
     {
         basePerson = GetComponent<BasePerson>();
         traCamera = transform.Find("攝影機");
-
+        textBulletCurrent = GameObject.Find("目前子彈數量").GetComponent<Text>();
+        textBulletTotal = GameObject.Find("子彈總數").GetComponent<Text>();
+        UpdateUIBullet();
     }
 
     private void Update()
@@ -41,6 +51,7 @@ public class ControllerPlayer : MonoBehaviour
         GetTurnInput();
         TurnCamera();
         Fire();
+        Jump();
 
         basePerson.Turn(v3Turn.y, v3Turn.x);
     }
@@ -76,7 +87,29 @@ public class ControllerPlayer : MonoBehaviour
     }
     private void Fire()
     {
-        if (Input.GetKey(KeyCode.Mouse0)) basePerson.Fire();
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            basePerson.Fire();
+            UpdateUIBullet();
+        }
+    }
+    private void UpdateUIBullet()
+    {
+        textBulletCurrent.text = basePerson.bulletCurrent.ToString();
+        textBulletTotal.text = basePerson.bulletTotal.ToString();
+    }
+    private void Reload()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            basePerson.RelosdBullent();
+            UpdateUIBullet();
+        }
+    }
+    private void Jump()
+    {
+        if (Input.GetKeyDown(KeyCode.Space)) basePerson.Jump();
+
     }
     #endregion
 }
