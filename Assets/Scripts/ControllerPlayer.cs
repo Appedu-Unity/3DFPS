@@ -31,6 +31,9 @@ public class ControllerPlayer : MonoBehaviour
     /// </summary>
     private Text textBulletTotal;
     #endregion
+    /// <summary>
+    /// 攝影機旋轉 : 面向目標物件
+    /// </summary>
     private void TurnCamera()
     {
         traCamera.LookAt(basePerson.traTarget);
@@ -51,6 +54,7 @@ public class ControllerPlayer : MonoBehaviour
         GetTurnInput();
         TurnCamera();
         Fire();
+        Reload();
         Jump();
 
         basePerson.Turn(v3Turn.y, v3Turn.x);
@@ -85,6 +89,9 @@ public class ControllerPlayer : MonoBehaviour
         v3Turn.x = mouseY;                          // 物件 X 軸對應滑鼠 Y
         v3Turn.y = mouseX;                          // 物件 Y 軸對應滑鼠 X
     }
+    /// <summary>
+    /// 玩家開槍的方式 :按下做鍵
+    /// </summary>
     private void Fire()
     {
         if (Input.GetKey(KeyCode.Mouse0))
@@ -93,16 +100,22 @@ public class ControllerPlayer : MonoBehaviour
             UpdateUIBullet();
         }
     }
+    /// <summary>
+    /// 更新子彈介面:目前與總數
+    /// </summary>
     private void UpdateUIBullet()
     {
         textBulletCurrent.text = basePerson.bulletCurrent.ToString();
         textBulletTotal.text = basePerson.bulletTotal.ToString();
     }
+    /// <summary>
+    /// 換彈匣
+    /// </summary>
     private void Reload()
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            basePerson.RelosdBullent();
+            basePerson.ReloadBullet();
             UpdateUIBullet();
         }
     }

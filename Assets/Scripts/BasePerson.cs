@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using System.Collections;
+
 public class BasePerson : MonoBehaviour
 {
     #region 欄位
@@ -14,6 +15,27 @@ public class BasePerson : MonoBehaviour
     public float attack = 10;
     [Header("旋轉速度"), Range(0, 1000)]
     public float turn = 5;
+    [Header("上下旋轉靈敏度"), Range(0, 100)]
+    public float mouseUpDown = 1.5f;
+    [Header("目標物件上下範圍限制")]
+    public Vector2 v2TargetLimit = new Vector2(0, 3);
+    [Header("發射子彈位置")]
+    public Transform traFirePoint;
+    [Header("子彈預製物")]
+    public GameObject objBullet;
+    [Header("子彈發射速度"), Range(0, 3000)]
+    public float speedBullet = 600;
+    [Header("子彈發射間隔"), Range(0, 1)]
+    public float intervalFire = 0.5f;
+    [Header("音效")]
+    public AudioClip soundFire;
+    public AudioClip soundFireEmpty;
+    // HideInInspector 可以讓公開欄位不要顯示在面板
+    /// <summary>
+    /// 目標物件
+    /// </summary>
+    [HideInInspector]
+    public Transform traTarget;
 
     /// <summary>
     /// 血量最大值
@@ -23,36 +45,7 @@ public class BasePerson : MonoBehaviour
     private Rigidbody rig;
     private AudioSource aud;
 
-    [HideInInspector]
-    public Transform traTarget;
-
-
-    #endregion
-    [Header("地板檢查")]
-    public float groundRadius = 0.5f;
-    public Vector3 groundOffset;
-
-    private bool isGround;
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = new Color(1, 0, 0, 0.3f);
-        Gizmos.DrawSphere(transform.position + groundOffset, groundRadius);
-    }
-
-    [Header("發射子彈位置")]
-    public Transform traFirePoint;
-    [Header("子彈預製物")]
-    public GameObject objBullet;
-    [Header("子彈發射速度"), Range(0, 3000)]
-    public float speedBullet = 600;
-    [Header("子彈發射間隔時間"), Range(0, 3000)]
-    public float intervalFire = 0.1f;
-    [Header("開槍聲音")]
-    public AudioClip soundFire;
-    [Header("上下旋轉靈敏度"), Range(0, 100)]
-    public float moussUpDown = 1.5f;
-    [Header("目標物件上下限制範圍")]
-    public Vector2 v2TargetLimit = new Vector2(0, 3);
+    [HideInInspector]       // 將公開的欄位隱藏
     /// <summary>
     /// 子彈目前數量
     /// </summary>
@@ -66,14 +59,24 @@ public class BasePerson : MonoBehaviour
     /// 子彈總數
     /// </summary>
     public int bulletTotal = 120;
-
+    /// <summary>
+    /// 開槍用計時器
+    /// </summary>
     private float timerFire;
-
+    /// <summary>
+    /// 動畫設置物件
+    /// </summary>
     private Rig rigging;
-    private void Update()
-    {
-        AnimatorMove();
-    }
+    #endregion
+
+    [Header("檢查地板")]
+    public float groundRadius = 0.5f;
+    public Vector3 groundOffset;
+    [Header("跳躍後恢復權重的時間")]
+    public float timeRestoreWeight = 1.3f;
+
+    private bool isGround;
+
     #region 事件
     private void Start()
     {
@@ -85,13 +88,24 @@ public class BasePerson : MonoBehaviour
 
         traTarget = transform.Find("目標物件");
         rigging = transform.Find("設置物件").GetComponent<Rig>();
+    }
 
+    private void Update()
+    {
+        //AnimatorMove();
+        CheckGround();
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = new Color(1, 0, 0, 0.3f);
+        Gizmos.DrawSphere(transform.position + groundOffset, groundRadius);
     }
     #endregion
 
     #region 方法
     /// <summary>
-    /// 移動，必須在FixedUpdate 呼叫
+    /// 移動，必須在 FixedUpdate 呼叫
     /// </summary>
     /// <param name="movePosition">要移動的座標資訊</param>
     public void Move(Vector3 movePosition)
@@ -100,33 +114,23 @@ public class BasePerson : MonoBehaviour
         rig.MovePosition(transform.position + movePosition * speed);
     }
 
-
-    public AudioClip soundFireEmpty;
     /// <summary>
     /// 旋轉
     /// </summary>
-    /// <param name="turnValue">要旋轉的值</param>
-    public void Turn(float turnValueY , float moveTarget)
+    /// <param name="turnValueY">要旋轉的值</param>
+    /// <param name="moveTarget">要位移目標物件的值</param>
+    public void Turn(float turnValueY, float moveTarget)
     {
-        // 變形.旋轉(三維向量 * 旋轉速度)
-        transform.Rotate(transform.up *turnValueY * turn *Time.deltaTime);
-        //目標物件.位移(x,y,z)
-        traTarget.Translate(0, moveTarget * moussUpDown * Time.deltaTime, 0);
-        //取得目標物件區域座標 並限制在範圍內 最後更新座標
+        // 變形.旋轉(上方 * 旋轉值 * 旋轉速度)
+        transform.Rotate(transform.up * turnValueY * turn * Time.deltaTime);
+        // 目標物件.位移(x, y, z)
+        traTarget.Translate(0, moveTarget * mouseUpDown * Time.deltaTime, 0);
+        // 取得目標物件區域座標 並限制在範圍內 最後更新座標
         Vector3 posTarget = traTarget.localPosition;
         posTarget.y = Mathf.Clamp(posTarget.y, v2TargetLimit.x, v2TargetLimit.y);
         traTarget.localPosition = posTarget;
     }
-    /// <summary>
-    /// 動畫-移動
-    /// </summary>
-    private void AnimatorMove()
-    {
-        /*
-        bool move = rig.velocity.x != 0 || rig.velocity.z != 0;
-        ani.SetBool("走路開關", true);
-        */
-    }
+
     /// <summary>
     /// 開槍方法
     /// </summary>
@@ -137,13 +141,13 @@ public class BasePerson : MonoBehaviour
         if (timerFire < intervalFire) timerFire += Time.deltaTime;
         else
         {
-            if (bulletCurrent >0) { 
-            
-            bulletCurrent--;
-            timerFire = 0;
-            aud.PlayOneShot(soundFire, Random.Range(0.5f, 1.2f));
-            GameObject tempBullet = Instantiate(objBullet, traFirePoint.position, Quaternion.identity);
-            tempBullet.GetComponent<Rigidbody>().AddForce(traFirePoint.right * speedBullet);
+            if (bulletCurrent > 0)
+            {
+                bulletCurrent--;
+                timerFire = 0;
+                aud.PlayOneShot(soundFire, Random.Range(0.5f, 1.2f));
+                GameObject tempBullet = Instantiate(objBullet, traFirePoint.position, Quaternion.identity);
+                tempBullet.GetComponent<Rigidbody>().AddForce(-traFirePoint.forward * speedBullet);
             }
             else
             {
@@ -152,54 +156,81 @@ public class BasePerson : MonoBehaviour
             }
         }
     }
+
     /// <summary>
     /// 換彈匣
     /// </summary>
-    public void RelosdBullent()    
+    public void ReloadBullet()
     {
-        //如果 目前子彈 等於 彈匣 或者 總數 為零 就跳出 - 不需要換子彈
-        if (bulletCurrent == bulletClip && bulletTotal == 0) return;
-        int bulletGetCount = bulletClip - bulletCurrent;    //計算取出數量 = 彈匣 - 目前
-        if (bulletTotal >= bulletGetCount)          //如果 總數 大於等於 要取出的數量
+        // 如果 目前子彈 等於 彈匣 或者 總數 為零 就跳出 - 不需要補子彈
+        if (bulletCurrent == bulletClip || bulletTotal == 0) return;
+
+        StartCoroutine(Reloading());
+
+        int bulletGetCount = bulletClip - bulletCurrent;        // 計算取出數量 = 彈匣 - 目前
+
+        if (bulletTotal >= bulletGetCount)                      // 如果 總數 大於等於 要取出的數量
         {
-            bulletTotal -= bulletGetCount;          //總數 - 取出數量
-            bulletCurrent += bulletGetCount;        //目前 + 取出數量
+            bulletTotal -= bulletGetCount;                      // 總數 - 取出數量
+            bulletCurrent += bulletGetCount;                    // 目前 + 取出數量
         }
-        else                                        //總數 不夠時 直接將總數給目前子彈
+        else                                                    // 總數 不夠時 直接將總數給目前子彈
         {
-            bulletCurrent += bulletTotal;           //將剩餘子彈給目前子彈
-            bulletTotal = 0;                        //沒有總數子彈
+            bulletCurrent += bulletTotal;                       // 將剩餘子彈給目前子彈
+            bulletTotal = 0;                                    // 沒有總數子彈
         }
     }
+
     /// <summary>
-    /// 跳躍功能:利用鋼體讓角色往上移
+    /// 跳躍功能：利用剛體讓角色往上跳
     /// </summary>
     public void Jump()
     {
-        rigging.weight = 0;
-        rig.AddForce(0, jump, 0);
-        ani.SetBool("跳躍開關", true);
+        if (isGround)
+        {
+            rigging.weight = 0;
+            rig.AddForce(0, jump, 0);
+            CancelInvoke("RestoreWeight");
+            Invoke("RestoreWeight", timeRestoreWeight);
+        }
     }
+    private void RestoreWeight()
+    {
+        rigging.weight = 1;
+    }
+
     /// <summary>
     /// 檢查地板
     /// </summary>
     private void CheckGround()
     {
-        Collider[] hit = Physics.OverlapSphere(transform.position + groundOffset, groundRadius, 1 << 8);
-
-        isGround = hit[0] && hit[0].name == "地板";
+        Collider[] hit = Physics.OverlapSphere(transform.position + groundOffset, groundRadius, 1 << 9);
+        // 如果 碰撞陣列數量 > 0 並且 碰撞物件名稱為地板 就代表在地板 否則 就不再地板
+        isGround = hit.Length > 0 && hit[0].name == "地板" ? true : false;
+        ani.SetBool("跳躍開關", !isGround);
     }
+
     /// <summary>
     /// 換彈匣狀態 - 動畫以及等待動畫完畢
     /// </summary>
     private IEnumerator Reloading()
     {
-        ani.SetBool("還彈匣開關", true);
-        //
-        yield return new WaitForSeconds(ani.GetCurrentAnimatorStateInfo(0).length * 0.8f);
+        ani.SetBool("換彈匣開關", true);
+        rigging.weight = 0.5f;
+
+        // ani.GetCurrentAnimatorStateInfo(0).length 取得圖層 0 目前動畫的長度
+        yield return new WaitForSeconds(ani.GetCurrentAnimatorStateInfo(0).length * 0.9f);
 
         ani.SetBool("換彈匣開關", false);
         rigging.weight = 1;
+    }
+
+    /// <summary>
+    /// 動畫 - 移動
+    /// </summary>
+    private void AnimatorMove()
+    {
+        ani.SetBool("走路開關", rig.velocity.x != 0 || rig.velocity.z != 0);
     }
     #endregion
 }
