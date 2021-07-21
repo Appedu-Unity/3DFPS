@@ -3308,7 +3308,7 @@ PrefabInstance:
     - target: {fileID: 2020493098519538804, guid: a25214702841d804ebaafc81ac9175a7,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2.597
+      value: -8.44
       objectReference: {fileID: 0}
     - target: {fileID: 2020493098519538804, guid: a25214702841d804ebaafc81ac9175a7,
         type: 3}
@@ -3318,7 +3318,7 @@ PrefabInstance:
     - target: {fileID: 2020493098519538804, guid: a25214702841d804ebaafc81ac9175a7,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.109
+      value: 8.55
       objectReference: {fileID: 0}
     - target: {fileID: 2020493098519538804, guid: a25214702841d804ebaafc81ac9175a7,
         type: 3}
@@ -3387,6 +3387,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   state: 0
+  v2IdleToRandomWalk: {x: 2, y: 6}
+  radiusRandomWalk: 20
 --- !u!195 &1319251449
 NavMeshAgent:
   m_ObjectHideFlags: 0

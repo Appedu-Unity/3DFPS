@@ -147,7 +147,7 @@ public class BasePerson : MonoBehaviour
                 timerFire = 0;
                 aud.PlayOneShot(soundFire, Random.Range(0.5f, 1.2f));
                 GameObject tempBullet = Instantiate(objBullet, traFirePoint.position, Quaternion.identity);
-                tempBullet.GetComponent<Rigidbody>().AddForce(-traFirePoint.forward * speedBullet);
+                tempBullet.GetComponent<Rigidbody>().AddForce(traFirePoint.right * speedBullet);
             }
             else
             {
