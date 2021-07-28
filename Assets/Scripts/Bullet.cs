@@ -1,0 +1,17 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+/// <summary>
+/// 子彈
+/// </summary>
+public class Bullet : MonoBehaviour
+{
+    [Header("子彈的上害值")]
+    public float attack;
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Destroy(gameObject);
+    }
+}

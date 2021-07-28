@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;               // 引用 事件 API 寫出與 OnClick 一樣的功能
 using UnityEngine.Animations.Rigging;
 using System.Collections;
 
@@ -30,13 +31,24 @@ public class BasePerson : MonoBehaviour
     [Header("音效")]
     public AudioClip soundFire;
     public AudioClip soundFireEmpty;
+    [Header("檢查地板")]
+    public float groundRadius = 0.5f;
+    public Vector3 groundOffset;
+    [Header("跳躍後恢復權重的時間")]
+    public float timeRestoreWeight = 1.3f;
+    public AudioClip soundHit;
+    public AudioClip soundHeadShot;
     // HideInInspector 可以讓公開欄位不要顯示在面板
     /// <summary>
     /// 目標物件
     /// </summary>
     [HideInInspector]
     public Transform traTarget;
-
+    [HideInInspector]
+    /// <summary>
+    /// 是否死亡:記錄此角色是否死亡
+    /// </summary>
+    public bool dead;
     /// <summary>
     /// 血量最大值
     /// </summary>
@@ -67,15 +79,11 @@ public class BasePerson : MonoBehaviour
     /// 動畫設置物件
     /// </summary>
     private Rig rigging;
+    private bool isGround;
     #endregion
 
-    [Header("檢查地板")]
-    public float groundRadius = 0.5f;
-    public Vector3 groundOffset;
-    [Header("跳躍後恢復權重的時間")]
-    public float timeRestoreWeight = 1.3f;
-
-    private bool isGround;
+    [Header("受傷事件")]
+    public UnityEvent onHit;
 
     #region 事件
     private void Start()
@@ -93,7 +101,7 @@ public class BasePerson : MonoBehaviour
     private void Update()
     {
         //AnimatorMove();
-        CheckGround();
+        CheckGround();//確認使否在地面上
     }
 
     private void OnDrawGizmos()
@@ -101,9 +109,30 @@ public class BasePerson : MonoBehaviour
         Gizmos.color = new Color(1, 0, 0, 0.3f);
         Gizmos.DrawSphere(transform.position + groundOffset, groundRadius);
     }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.name.Contains("子彈"))
+        {
+            if (collision.contacts[0].thisCollider.GetType() == typeof(SphereCollider)) Hit(100, soundHeadShot);
+            else Hit(collision.gameObject.GetComponent<Bullet>().attack, soundHit);
+        }
+    }
     #endregion
 
     #region 方法
+    /// <summary>
+    /// 受傷
+    /// </summary>
+    /// <param name="damage"></param>
+    private void Hit(float damage, AudioClip sound)
+    {
+        hp -= damage;
+        aud.PlayOneShot(sound, Random.Range(0.8f, 1.2f));
+
+        if (hp <= 0) Dead();
+
+        onHit.Invoke();
+    }
     /// <summary>
     /// 移動，必須在 FixedUpdate 呼叫
     /// </summary>
@@ -112,6 +141,24 @@ public class BasePerson : MonoBehaviour
     {
         // 剛體.移動座標(物件座標 + 移動座標 * 速度)
         rig.MovePosition(transform.position + movePosition * speed);
+    }
+    /// <summary>
+    /// 死亡動畫
+    /// </summary>
+    private void Dead()
+    {
+        hp = 0;
+        ani.SetBool("死亡開關", true);
+        rigging.weight = 0;
+        dead = true;
+        // 關閉碰撞避免重複死亡判定與子彈碰撞
+        GetComponent<SphereCollider>().enabled = false;
+        GetComponent<CapsuleCollider>().enabled = false;
+        // 缸體速度歸零並約束所有
+        rig.velocity = Vector3.zero;
+        rig.constraints = RigidbodyConstraints.FreezeAll;
+
+        enabled = false;
     }
 
     /// <summary>
@@ -147,6 +194,10 @@ public class BasePerson : MonoBehaviour
                 timerFire = 0;
                 aud.PlayOneShot(soundFire, Random.Range(0.5f, 1.2f));
                 GameObject tempBullet = Instantiate(objBullet, traFirePoint.position, Quaternion.identity);
+
+                tempBullet.AddComponent<Bullet>().attack = attack;                                          //添加子彈腳本並賦予攻擊力
+                Physics.IgnoreCollision(GetComponent<Collider>(), tempBullet.GetComponent<Collider>());     //忽略子彈雨開槍者的碰撞
+
                 tempBullet.GetComponent<Rigidbody>().AddForce(traFirePoint.right * speedBullet);
             }
             else
