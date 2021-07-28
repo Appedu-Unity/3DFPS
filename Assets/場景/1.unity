@@ -3388,7 +3388,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   state: 0
   v2IdleToRandomWalk: {x: 2, y: 6}
+  turn: 3
+  distanceStop: 1.5
+  idleProbillity: 0.3
   radiusRandomWalk: 20
+  checkCudeOffsetForward: 5
+  checkCubeSize: {x: 1, y: 1, z: 10}
 --- !u!195 &1319251449
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -6763,6 +6768,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: unitychan
+      objectReference: {fileID: 0}
+    - target: {fileID: 2020493098519703636, guid: a25214702841d804ebaafc81ac9175a7,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a25214702841d804ebaafc81ac9175a7, type: 3}
